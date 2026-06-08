@@ -3,6 +3,7 @@
 require "active_support/concern"
 require "hortidex/version"
 require "hortidex/constants"
+require "hortidex/attribution"
 require "hortidex/name_formatter"
 require "hortidex/taxon_concept"
 require "hortidex/apply_task"

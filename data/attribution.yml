@@ -1,0 +1,61 @@
+# Attribution data for the upstream taxonomy sources.
+#
+# `bin/taxonomy publish` bundles this file into data/export/ so it travels with
+# the CSV release files to the hortidex gem repo.
+#
+# This is hand-maintained, not generated: review each source's current citation
+# wording, licence, and access date whenever the source data files are
+# refreshed, and update the relevant entry below before bumping the gem version.
+
+- id: powo
+  name: "WCVP: World Checklist of Vascular Plants"
+  rightsholder: "Royal Botanic Gardens, Kew"
+  url: "https://powo.science.kew.org"
+  license:
+    name: "CC BY 3.0"
+    url: "https://creativecommons.org/licenses/by/3.0/"
+  description: >-
+    Taxonomy data is sourced from the Plants of the World Online database
+    (Royal Botanic Gardens, Kew), distributed as the WCVP dataset.
+  citation:
+    author: "Govaerts R (ed.)"
+    year: 2026
+    title: "WCVP: World Checklist of Vascular Plants"
+    container: "Facilitated by the Royal Botanic Gardens, Kew"
+    url: "https://doi.org/10.34885/rvc3-4d77"
+    accessed_on: "2026-01-06"
+
+- id: upov
+  name: "UPOV GENIE"
+  rightsholder: "International Union for the Protection of New Varieties of Plants"
+  url: "https://www.upov.int/genie/"
+  license:
+    name: "CC BY 4.0"
+    url: "https://creativecommons.org/licenses/by/4.0/"
+  description: >-
+    Botanical and common names for plant varieties are sourced from the UPOV
+    Genera and Species Database (GENIE), and have been processed and linked to
+    WCVP taxonomy records.
+  citation:
+    author: "International Union for the Protection of New Varieties of Plants"
+    title: >-
+      List of UPOV Codes with Botanical and Common Names, Technical Working
+      Party(s) (TWPs) and Crop Type(s)
+    url: "https://www.upov.int/genie/reports/twp.xhtml"
+    accessed_on: "2026-05-14"
+
+- id: eupvp
+  name: "EU Plant Variety Portal"
+  rightsholder: "European Commission"
+  url: "https://ec.europa.eu/food/plant-variety-portal/"
+  license:
+    name: "CC BY 4.0"
+    url: "https://commission.europa.eu/legal-notice_en"
+  description: >-
+    Registered plant variety denominations are sourced from the EU Plant
+    Variety Portal, reused under the European Commission's reuse framework.
+  citation:
+    author: "European Commission"
+    title: "EU Plant Variety Portal"
+    url: "https://ec.europa.eu/food/plant-variety-portal/"
+    accessed_on: "2026-05-15"

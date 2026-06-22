@@ -186,7 +186,7 @@ Hortidex::Attribution.sources.each do |source|
   puts source.rightsholder   # "Royal Botanic Gardens, Kew"
   puts source.license.name   # "CC BY 3.0"
   puts source.description
-  puts source.citation.to_s  # plain-text citation, e.g. "Govaerts R (ed.) (2026). WCVP: ... Accessed 2026-01-06."
+  puts source.citation.to_s  # plain-text citation, e.g. "Govaerts R (ed.) (2026). WCVP: ... Accessed 2026-06-04."
   puts source.citation.to_html
 end
 

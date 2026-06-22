@@ -17,7 +17,7 @@ The gem ships CSV data files and an ActiveRecord-compatible apply task that upse
 ## Installation
 
 ```ruby
-gem 'hortidex', '~> 1.0'
+gem 'hortidex', '~> 2.0'
 ```
 
 ## Database setup

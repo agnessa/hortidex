@@ -178,4 +178,19 @@ safe_join(taxon_concept.name_parts.map { |text, italic|
 
 ## Attribution
 
-See the `ATTRIBUTION` file for licence details and required attribution notices for each data source.
+Licence and citation details for each upstream source (POWO/WCVP, UPOV GENIE, EU Plant Variety Portal) are shipped with the gem and available as structured data via `Hortidex::Attribution`:
+
+```ruby
+Hortidex::Attribution.sources.each do |source|
+  puts source.name           # "WCVP: World Checklist of Vascular Plants"
+  puts source.rightsholder   # "Royal Botanic Gardens, Kew"
+  puts source.license.name   # "CC BY 3.0"
+  puts source.description
+  puts source.citation.to_s  # plain-text citation, e.g. "Govaerts R (ed.) (2026). WCVP: ... Accessed 2026-01-06."
+  puts source.citation.to_html
+end
+
+Hortidex::Attribution["powo"] # look up a single source by id
+```
+
+Each `citation` is a structured object (`author`, `year`, `title`, `container`, `url`, `accessed_on`) so that consumers can lay the parts out themselves, or use the ready-made `to_s` / `to_html` renderings. This data is hand-maintained alongside each taxonomy update — see [data/attribution.yml](data/attribution.yml) — so the wording and access dates always match the data you received with this gem version.

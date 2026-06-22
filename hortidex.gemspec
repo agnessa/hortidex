@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   git_tracked = Dir.chdir(__dir__) { `git ls-files -z 2>/dev/null`.split("\x0") }
   source_files = git_tracked.reject { |f| f.start_with?("spec/") || %w[Gemfile Gemfile.lock].include?(f) }
-  data_files = Dir[File.join(__dir__, "data/*.csv.gz")].map { |f| f.delete_prefix("#{__dir__}/") }
+  data_files = Dir[File.join(__dir__, "data/*.{csv.gz,yml}")].map { |f| f.delete_prefix("#{__dir__}/") }
   spec.files = source_files + data_files
   spec.require_paths = ["lib"]
 

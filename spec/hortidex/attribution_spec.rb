@@ -30,8 +30,8 @@ RSpec.describe Hortidex::Attribution do
       expect(citation.author).to eq("Govaerts R (ed.)")
       expect(citation.year).to eq(2026)
       expect(citation.title).to eq("WCVP: World Checklist of Vascular Plants")
-      expect(citation.url).to eq("https://doi.org/10.34885/rvc3-4d77")
-      expect(citation.accessed_on).to eq("2026-01-06")
+      expect(citation.url).to eq("https://doi.org/10.34885/egs6-cp24")
+      expect(citation.accessed_on).to eq("2026-06-04")
     end
   end
 

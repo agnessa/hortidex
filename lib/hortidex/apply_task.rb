@@ -89,18 +89,20 @@ module Hortidex
           id TEXT, rank TEXT, source TEXT, status TEXT,
           scientific_name TEXT, authorship TEXT,
           parent_id TEXT, accepted_name_id TEXT,
-          ancestor_path TEXT, powo_id TEXT, upov_code TEXT, gbif_id TEXT
+          ancestor_path TEXT, powo_id TEXT, upov_code TEXT, gbif_id TEXT,
+          hortidex_version TEXT
         )
       SQL
 
       Zlib::GzipReader.open(path) do |gz|
         CSV.new(gz, headers: true).each_slice(BATCH_SIZE) do |slice|
-          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id]) }.join(", ")
+          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id hortidex_version]) }.join(", ")
           conn.execute("INSERT INTO temp_taxon_concepts VALUES #{values}")
         end
       end
 
-      version = conn.quote(Hortidex::VERSION)
+      # hortidex_version is per-row provenance shipped in the data file (the release
+      # each row was last backed by an upstream source), not the running gem version.
       upsert_sql = <<~SQL
         INSERT INTO taxon_concepts
           (id, rank, source, status, scientific_name, authorship,
@@ -108,7 +110,7 @@ module Hortidex
            hortidex_version)
         SELECT id::uuid, rank, source, status, scientific_name, authorship,
                parent_id::uuid, accepted_name_id::uuid, ancestor_path::ltree, powo_id, upov_code, gbif_id,
-               #{version}
+               hortidex_version
         FROM temp_taxon_concepts
         WHERE %{filter}
         ORDER BY COALESCE(LENGTH(ancestor_path) - LENGTH(REPLACE(ancestor_path, '.', '')), 0) ASC

@@ -22,8 +22,8 @@
     year: 2026
     title: "WCVP: World Checklist of Vascular Plants"
     container: "Facilitated by the Royal Botanic Gardens, Kew"
-    url: "https://doi.org/10.34885/rvc3-4d77"
-    accessed_on: "2026-01-06"
+    url: "https://doi.org/10.34885/egs6-cp24"
+    accessed_on: "2026-06-04"
 
 - id: upov
   name: "UPOV GENIE"
@@ -42,7 +42,7 @@
       List of UPOV Codes with Botanical and Common Names, Technical Working
       Party(s) (TWPs) and Crop Type(s)
     url: "https://www.upov.int/genie/reports/twp.xhtml"
-    accessed_on: "2026-05-14"
+    accessed_on: "2026-06-12"
 
 - id: eupvp
   name: "EU Plant Variety Portal"
@@ -58,4 +58,4 @@
     author: "European Commission"
     title: "EU Plant Variety Portal"
     url: "https://ec.europa.eu/food/plant-variety-portal/"
-    accessed_on: "2026-05-15"
+    accessed_on: "2026-06-12"

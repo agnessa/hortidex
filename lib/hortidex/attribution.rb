@@ -15,6 +15,10 @@ module Hortidex
   module Attribution
     DATA_FILE = File.expand_path("../../data/attribution.yml", __dir__)
 
+    # CC BY forbids implying the upstream rightsholders endorse this work; surface
+    # this alongside the citations wherever attribution is displayed.
+    NON_ENDORSEMENT = "None of the upstream rightsholders endorse hortidex or this derivative dataset."
+
     License = Data.define(:name, :url)
 
     Citation = Data.define(:author, :year, :title, :container, :url, :accessed_on) do
@@ -46,7 +50,7 @@ module Hortidex
       end
     end
 
-    Source = Data.define(:id, :name, :rightsholder, :url, :license, :description, :citation)
+    Source = Data.define(:id, :name, :rightsholder, :url, :license, :description, :modifications, :citation)
 
     class << self
       # Returns the Source records described in data/attribution.yml, in the
@@ -72,6 +76,7 @@ module Hortidex
           rightsholder: entry["rightsholder"],
           url: entry["url"],
           description: entry["description"],
+          modifications: entry["modifications"],
           license: License.new(name: license["name"], url: license["url"]),
           citation: Citation.new(
             author: citation["author"],

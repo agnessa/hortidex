@@ -23,4 +23,5 @@ SOFTWARE.
 ---
 
 The data files shipped with this gem are derived from third-party sources and
-are subject to separate licence terms. See the ATTRIBUTION file for details.
+are subject to separate licence terms. See data/attribution.yml for the source,
+licence, and citation of each dataset.

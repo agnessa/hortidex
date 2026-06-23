@@ -1,12 +1,8 @@
 # hortidex
 
-A curated, versioned snapshot of plant taxonomy data derived from:
+A curated, versioned snapshot of plant taxonomy data derived from Plants of the World Online (WCVP), UPOV GENIE, and the EU Plant Variety Database, packaged as a Ruby gem: CSV data files plus an ActiveRecord-compatible apply task that upserts the dataset into a Postgres database.
 
-- [Plants of the World Online / WCVP](https://powo.science.kew.org/) — accepted names, synonyms, and the full taxonomic hierarchy from family down to infraspecific rank
-- [UPOV GENIE](https://www.upov.int/genie/) — UPOV codes for genera, species, and infraspecific taxa used in plant variety protection and their common names
-- [EU Plant Variety Database](https://ec.europa.eu/food/plant-variety-portal/) — registered EU variety denominations
-
-The gem ships CSV data files and an ActiveRecord-compatible apply task that upserts the dataset into a Postgres database.
+Source, licence, and citation for each bundled dataset live in [`data/attribution.yml`](data/attribution.yml) — the single source of truth, so dataset descriptions don't drift across files.
 
 ## Requirements
 

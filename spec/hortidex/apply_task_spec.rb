@@ -44,8 +44,10 @@ RSpec.describe Hortidex::ApplyTask do
     conn.execute(<<~SQL)
       CREATE TABLE taxonomy_apply_runs (
         id bigserial PRIMARY KEY,
-        hortidex_version text NOT NULL,
-        started_at timestamp NOT NULL
+        started_at timestamp NOT NULL,
+        completed_at timestamp,
+        status smallint NOT NULL DEFAULT 0,
+        hortidex_version text NOT NULL
       )
     SQL
   end
@@ -141,13 +143,53 @@ RSpec.describe Hortidex::ApplyTask do
 
   describe "version check" do
     before do
-      conn.execute("INSERT INTO taxonomy_apply_runs (hortidex_version, started_at) VALUES ('999.0.0', NOW())")
+      conn.execute("INSERT INTO taxonomy_apply_runs (hortidex_version, status, started_at) VALUES ('999.0.0', 1, NOW())")
       empty_concordance
       gz_csv(File.join(data_dir, "taxon_concepts.csv.gz"), TC_HEADERS)
     end
 
-    it "raises when the gem is older than the last applied version" do
+    it "raises when the gem is older than the last succeeded version" do
       expect { task.run }.to raise_error(RuntimeError, /Downgrade refused/)
+    end
+
+    it "ignores non-succeeded runs when finding the last applied version" do
+      # A newer version that only ever reached :running or :failed is not actually
+      # in the table, so it must not gate the downgrade guard.
+      conn.execute("UPDATE taxonomy_apply_runs SET status = 2 WHERE hortidex_version = '999.0.0'")
+      expect { task.run }.not_to raise_error
+    end
+  end
+
+  describe "run lifecycle" do
+    let(:id) { SecureRandom.uuid }
+
+    before do
+      empty_concordance
+      gz_csv(File.join(data_dir, "taxon_concepts.csv.gz"), TC_HEADERS,
+        [[id, "family", "powo", "accepted", "Rosaceae", "Juss.", nil, nil, nil, nil, nil, nil, "2.0.0"]])
+    end
+
+    def last_run
+      conn.select_one("SELECT status, started_at, completed_at FROM taxonomy_apply_runs ORDER BY started_at DESC LIMIT 1")
+    end
+
+    it "records a succeeded run, stamping started_at and completed_at" do
+      task.run
+      row = last_run
+      expect(row["status"].to_i).to eq(1)
+      expect(row["started_at"]).not_to be_nil
+      expect(row["completed_at"]).not_to be_nil
+    end
+
+    it "marks the run failed (no completed_at) and re-raises when the apply blows up" do
+      # A malformed id forces a cast error inside the apply transaction.
+      gz_csv(File.join(data_dir, "taxon_concepts.csv.gz"), TC_HEADERS,
+        [["not-a-uuid", "family", "powo", "accepted", "Rosaceae", "Juss.", nil, nil, nil, nil, nil, nil, "2.0.0"]])
+      expect { task.run }.to raise_error(ActiveRecord::StatementInvalid)
+      row = last_run
+      expect(row["status"].to_i).to eq(2)
+      expect(row["started_at"]).not_to be_nil
+      expect(row["completed_at"]).to be_nil
     end
   end
 

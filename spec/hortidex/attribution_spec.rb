@@ -15,6 +15,7 @@ RSpec.describe Hortidex::Attribution do
       expect(powo.rightsholder).to eq("Royal Botanic Gardens, Kew")
       expect(powo.url).to eq("https://powo.science.kew.org")
       expect(powo.description).to be_a(String)
+      expect(powo.modifications).to match(/modified derivative/i)
     end
 
     it "exposes the licence as a structured record" do
@@ -30,8 +31,8 @@ RSpec.describe Hortidex::Attribution do
       expect(citation.author).to eq("Govaerts R (ed.)")
       expect(citation.year).to eq(2026)
       expect(citation.title).to eq("WCVP: World Checklist of Vascular Plants")
-      expect(citation.url).to eq("https://doi.org/10.34885/rvc3-4d77")
-      expect(citation.accessed_on).to eq("2026-01-06")
+      expect(citation.url).to eq("https://doi.org/10.34885/egs6-cp24")
+      expect(citation.accessed_on).to eq("2026-06-04")
     end
   end
 
@@ -42,6 +43,12 @@ RSpec.describe Hortidex::Attribution do
 
     it "returns nil for an unknown id" do
       expect(described_class["does_not_exist"]).to be_nil
+    end
+  end
+
+  describe "NON_ENDORSEMENT" do
+    it "states the upstream rightsholders do not endorse the derivative" do
+      expect(described_class::NON_ENDORSEMENT).to include("endorse")
     end
   end
 

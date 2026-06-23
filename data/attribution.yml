@@ -17,13 +17,18 @@
   description: >-
     Taxonomy data is sourced from the Plants of the World Online database
     (Royal Botanic Gardens, Kew), distributed as the WCVP dataset.
+  modifications: >-
+    Modified derivative, not the official WCVP distribution: a subset including
+    all accepted names and selected non-accepted names, each assigned a stable
+    hortidex identifier so consumers can absorb later dataset updates, with a
+    materialised ancestor path and links to the other datasets.
   citation:
     author: "Govaerts R (ed.)"
     year: 2026
     title: "WCVP: World Checklist of Vascular Plants"
     container: "Facilitated by the Royal Botanic Gardens, Kew"
-    url: "https://doi.org/10.34885/rvc3-4d77"
-    accessed_on: "2026-01-06"
+    url: "https://doi.org/10.34885/egs6-cp24"
+    accessed_on: "2026-06-04"
 
 - id: upov
   name: "UPOV GENIE"
@@ -36,13 +41,18 @@
     Botanical and common names for plant varieties are sourced from the UPOV
     Genera and Species Database (GENIE), and have been processed and linked to
     WCVP taxonomy records.
+  modifications: >-
+    Botanical names follow POWO/WCVP wherever a link to a UPOV code was
+    established; the UPOV code is retained to bridge to cultivar denominations,
+    and common names are taken from GENIE. Some UPOV taxa were matched to POWO
+    manually to resolve minor orthographic differences.
   citation:
     author: "International Union for the Protection of New Varieties of Plants"
     title: >-
       List of UPOV Codes with Botanical and Common Names, Technical Working
       Party(s) (TWPs) and Crop Type(s)
     url: "https://www.upov.int/genie/reports/twp.xhtml"
-    accessed_on: "2026-05-14"
+    accessed_on: "2026-06-12"
 
 - id: eupvp
   name: "EU Plant Variety Portal"
@@ -54,8 +64,13 @@
   description: >-
     Registered plant variety denominations are sourced from the EU Plant
     Variety Portal, reused under the European Commission's reuse framework.
+  modifications: >-
+    Only UPOV codes and variety denomination names are used, taken verbatim;
+    cultivar registration details (which may carry stricter terms) are not
+    included. A few rows with malformed UPOV codes were corrected manually to
+    align with the other datasets.
   citation:
     author: "European Commission"
     title: "EU Plant Variety Portal"
     url: "https://ec.europa.eu/food/plant-variety-portal/"
-    accessed_on: "2026-05-15"
+    accessed_on: "2026-06-12"

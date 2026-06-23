@@ -1,12 +1,8 @@
 # hortidex
 
-A curated, versioned snapshot of plant taxonomy data derived from:
+A curated, versioned snapshot of plant taxonomy data derived from Plants of the World Online (WCVP), UPOV GENIE, and the EU Plant Variety Database, packaged as a Ruby gem: CSV data files plus an ActiveRecord-compatible apply task that upserts the dataset into a Postgres database.
 
-- [Plants of the World Online / WCVP](https://powo.science.kew.org/) — accepted names, synonyms, and the full taxonomic hierarchy from family down to infraspecific rank
-- [UPOV GENIE](https://www.upov.int/genie/) — UPOV codes for genera, species, and infraspecific taxa used in plant variety protection and their common names
-- [EU Plant Variety Database](https://ec.europa.eu/food/plant-variety-portal/) — registered EU variety denominations
-
-The gem ships CSV data files and an ActiveRecord-compatible apply task that upserts the dataset into a Postgres database.
+Source, licence, and citation for each bundled dataset live in [`data/attribution.yml`](data/attribution.yml) — the single source of truth, so dataset descriptions don't drift across files.
 
 ## Requirements
 
@@ -17,7 +13,7 @@ The gem ships CSV data files and an ActiveRecord-compatible apply task that upse
 ## Installation
 
 ```ruby
-gem 'hortidex', '~> 1.0'
+gem 'hortidex', '~> 2.0'
 ```
 
 ## Database setup
@@ -33,22 +29,22 @@ This creates three tables.
 
 **`taxon_concepts`** — the main taxonomy table. Each row is a name record from the source datasets.
 
-| Column             | Type     | Notes                                                                          |
-|--------------------|----------|--------------------------------------------------------------------------------|
-| `id`               | uuid     | Stable across versions within a MAJOR release                                  |
+| Column             | Type     | Notes                                                                                                                                                            |
+|--------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`               | uuid     | Stable across versions within a MAJOR release                                                                                                                    |
 | `rank`             | string   | `family`, `genus`, `species`, `subspecies`, `variety`, `subvariety`, `form`, `subform`, `cultivar`, `nothosubspecies`, `nothovariety`, `nothoform`, `convariety` |
-| `source`           | string   | `powo`, `upov`, `eupvp`                                                        |
-| `status`           | string   | `accepted`, `synonym`, `orthographic`, `illegitimate`, `invalid`, `misapplied` |
-| `scientific_name`  | string   | Full name including rank connector for infraspecific taxa                      |
-| `authorship`       | string   | May be nil for cultivars and some variety records                              |
-| `parent_id`        | uuid     | FK → `taxon_concepts`; nil for family-rank records                             |
-| `accepted_name_id` | uuid     | FK → `taxon_concepts`; nil for accepted taxa                                   |
-| `powo_id`          | string   | POWO plant identifier; unique where present                                    |
-| `upov_code`        | string   | UPOV code; present for taxa sourced from GENIE                                 |
-| `gbif_id`          | string   | GBIF taxon key; unique where present                                           |
-| `ancestor_path`    | ltree    | Materialised path of `id` segments for ancestor/descendant queries             |
-| `search_vector`    | tsvector | Full-text index over `scientific_name`                                         |
-| `hortidex_version` | string   | Gem version that last wrote this row                                           |
+| `source`           | string   | `powo`, `upov`, `eupvp`                                                                                                                                          |
+| `status`           | string   | `accepted`, `synonym`, `orthographic`, `illegitimate`, `invalid`, `misapplied`                                                                                   |
+| `scientific_name`  | string   | Full name including rank connector for infraspecific taxa                                                                                                        |
+| `authorship`       | string   | May be nil for cultivars and some variety records                                                                                                                |
+| `parent_id`        | uuid     | FK → `taxon_concepts`; nil for family-rank records                                                                                                               |
+| `accepted_name_id` | uuid     | FK → `taxon_concepts`; nil for accepted taxa                                                                                                                     |
+| `powo_id`          | string   | POWO plant identifier; unique where present                                                                                                                      |
+| `upov_code`        | string   | UPOV code; present for taxa sourced from GENIE                                                                                                                   |
+| `gbif_id`          | string   | GBIF taxon key; unique where present                                                                                                                             |
+| `ancestor_path`    | ltree    | Materialised path of `id` segments for ancestor/descendant queries                                                                                               |
+| `search_vector`    | tsvector | Full-text index over `scientific_name`                                                                                                                           |
+| `hortidex_version` | string   | Dataset release this row was last backed by an upstream source; carry-over rows keep an older value                                                              |
 
 **`common_names`** — vernacular names, one row per name per locale per taxon.
 
@@ -60,7 +56,16 @@ This creates three tables.
 | `preferred`        | boolean | Whether this is the preferred name for the locale |
 | `source`           | string  | Source dataset                                    |
 
-**`taxonomy_apply_runs`** — internal table tracking each `taxonomy:apply` run; no application code needs to read this directly.
+**`taxonomy_apply_runs`** — internal bookkeeping for each `taxonomy:apply` run; no application code needs to read it directly.
+
+| Column             | Type      | Notes                                                                 |
+|--------------------|-----------|----------------------------------------------------------------------|
+| `hortidex_version` | string    | Gem version the run applied                                           |
+| `status`           | smallint  | `0` running, `1` succeeded, `2` failed                                |
+| `started_at`       | timestamp | Stamped when the run begins (NOT NULL)                                |
+| `completed_at`     | timestamp | Stamped only on success; NULL while running or after a failure        |
+
+A run is inserted as `running` with `started_at` *before* the apply transaction — so a crash still leaves a trace — then settled to `succeeded` (stamping `completed_at`) or `failed`. The downgrade guard reads the latest **succeeded** row and raises if the current gem is older than the last version successfully applied.
 
 Both FKs on `taxon_concepts` are `DEFERRABLE DEFERRED` to allow the apply task to upsert rows without ordering constraints.
 
@@ -186,7 +191,7 @@ Hortidex::Attribution.sources.each do |source|
   puts source.rightsholder   # "Royal Botanic Gardens, Kew"
   puts source.license.name   # "CC BY 3.0"
   puts source.description
-  puts source.citation.to_s  # plain-text citation, e.g. "Govaerts R (ed.) (2026). WCVP: ... Accessed 2026-01-06."
+  puts source.citation.to_s  # plain-text citation, e.g. "Govaerts R (ed.) (2026). WCVP: ... Accessed 2026-06-04."
   puts source.citation.to_html
 end
 

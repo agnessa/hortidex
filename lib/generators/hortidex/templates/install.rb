@@ -45,11 +45,10 @@ class HortidexInstall < ActiveRecord::Migration[<%= ActiveRecord::Migration.curr
     add_foreign_key :common_names, :taxon_concepts, deferrable: :deferred
 
     create_table :taxonomy_apply_runs, id: :uuid do |t|
-      t.datetime :started_at
+      t.datetime :started_at,    null: false
       t.datetime :completed_at
-      t.integer  :status,           limit: 2, null: false, default: 0
+      t.integer  :status,        limit: 2, null: false, default: 0  # 0=running 1=succeeded 2=failed
       t.string   :hortidex_version, null: false
-      t.jsonb    :step_outcomes,    null: false, default: {}
     end
   end
 end

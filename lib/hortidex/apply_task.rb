@@ -8,6 +8,10 @@ module Hortidex
     DATA_DIR = File.expand_path("../../data", __dir__)
     BATCH_SIZE = 500
 
+    # A taxonomy_apply_runs row is created :running before the apply transaction
+    # and settled to :succeeded (with completed_at) or :failed afterwards.
+    RUN_STATUS = {running: 0, succeeded: 1, failed: 2}.freeze
+
     def initialize(data_dir: DATA_DIR)
       @data_dir = data_dir
     end
@@ -16,20 +20,32 @@ module Hortidex
       conn = ActiveRecord::Base.connection
       check_version!(conn)
 
-      conn.transaction do
-        conn.execute("SET CONSTRAINTS ALL DEFERRED")
-        apply_concordance(conn)
-        upsert_taxon_concepts(conn)
-        upsert_common_names(conn)
-        record_run(conn)
+      # The run row lives outside the data transaction so a rollback still leaves a
+      # durable record: created :running, then settled :succeeded / :failed.
+      run_id = start_run(conn)
+      begin
+        conn.transaction do
+          conn.execute("SET CONSTRAINTS ALL DEFERRED")
+          apply_concordance(conn)
+          upsert_taxon_concepts(conn)
+          upsert_common_names(conn)
+        end
+      rescue
+        settle_run(conn, run_id, RUN_STATUS[:failed])
+        raise
       end
+      settle_run(conn, run_id, RUN_STATUS[:succeeded])
     end
 
     private
 
     def check_version!(conn)
+      # Only successful applies gate the guard; :running / :failed rows don't reflect
+      # data that's actually in the table. started_at is NOT NULL, so the ordering is
+      # unambiguous.
       last = conn.select_one(
-        "SELECT hortidex_version FROM taxonomy_apply_runs ORDER BY started_at DESC LIMIT 1"
+        "SELECT hortidex_version FROM taxonomy_apply_runs " \
+        "WHERE status = #{RUN_STATUS[:succeeded]} ORDER BY started_at DESC LIMIT 1"
       )
       return unless last
 
@@ -72,10 +88,22 @@ module Hortidex
         SQL
       end
 
-      # Remap the primary key itself last.
+      # Remap the primary key last. Two cases:
+      #   * rename — the new id doesn't exist yet → move the row's id over.
+      #   * merge  — the new id already exists (e.g. powo_adoption); the FK
+      #     columns above already point at it, so drop the redundant old row.
       conn.execute(<<~SQL)
-        UPDATE taxon_concepts SET id = c.new_uuid::uuid
-        FROM temp_concordance c WHERE taxon_concepts.id = c.old_uuid::uuid
+        UPDATE taxon_concepts t SET id = c.new_uuid::uuid
+        FROM temp_concordance c
+        WHERE t.id = c.old_uuid::uuid
+          AND NOT EXISTS (SELECT 1 FROM taxon_concepts e WHERE e.id = c.new_uuid::uuid)
+      SQL
+
+      conn.execute(<<~SQL)
+        DELETE FROM taxon_concepts t
+        USING temp_concordance c
+        WHERE t.id = c.old_uuid::uuid
+          AND EXISTS (SELECT 1 FROM taxon_concepts e WHERE e.id = c.new_uuid::uuid)
       SQL
 
       conn.execute("DROP TABLE temp_concordance")
@@ -89,18 +117,20 @@ module Hortidex
           id TEXT, rank TEXT, source TEXT, status TEXT,
           scientific_name TEXT, authorship TEXT,
           parent_id TEXT, accepted_name_id TEXT,
-          ancestor_path TEXT, powo_id TEXT, upov_code TEXT, gbif_id TEXT
+          ancestor_path TEXT, powo_id TEXT, upov_code TEXT, gbif_id TEXT,
+          hortidex_version TEXT
         )
       SQL
 
       Zlib::GzipReader.open(path) do |gz|
         CSV.new(gz, headers: true).each_slice(BATCH_SIZE) do |slice|
-          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id]) }.join(", ")
+          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id hortidex_version]) }.join(", ")
           conn.execute("INSERT INTO temp_taxon_concepts VALUES #{values}")
         end
       end
 
-      version = conn.quote(Hortidex::VERSION)
+      # hortidex_version is per-row provenance shipped in the data file (the release
+      # each row was last backed by an upstream source), not the running gem version.
       upsert_sql = <<~SQL
         INSERT INTO taxon_concepts
           (id, rank, source, status, scientific_name, authorship,
@@ -108,7 +138,7 @@ module Hortidex
            hortidex_version)
         SELECT id::uuid, rank, source, status, scientific_name, authorship,
                parent_id::uuid, accepted_name_id::uuid, ancestor_path::ltree, powo_id, upov_code, gbif_id,
-               #{version}
+               hortidex_version
         FROM temp_taxon_concepts
         WHERE %{filter}
         ORDER BY COALESCE(LENGTH(ancestor_path) - LENGTH(REPLACE(ancestor_path, '.', '')), 0) ASC
@@ -165,9 +195,19 @@ module Hortidex
       conn.execute("DROP TABLE temp_common_names")
     end
 
-    def record_run(conn)
+    def start_run(conn)
+      conn.select_value(
+        "INSERT INTO taxonomy_apply_runs (hortidex_version, status, started_at) " \
+        "VALUES (#{conn.quote(Hortidex::VERSION)}, #{RUN_STATUS[:running]}, NOW()) " \
+        "RETURNING id"
+      )
+    end
+
+    def settle_run(conn, run_id, status)
+      completed_at = (status == RUN_STATUS[:succeeded]) ? "NOW()" : "NULL"
       conn.execute(
-        "INSERT INTO taxonomy_apply_runs (hortidex_version, started_at) VALUES (#{conn.quote(Hortidex::VERSION)}, NOW())"
+        "UPDATE taxonomy_apply_runs SET status = #{status}, completed_at = #{completed_at} " \
+        "WHERE id = #{conn.quote(run_id)}"
       )
     end
 

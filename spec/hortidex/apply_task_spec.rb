@@ -139,6 +139,39 @@ RSpec.describe Hortidex::ApplyTask do
       expect(conn.select_value("SELECT COUNT(*) FROM taxon_concepts WHERE id = '#{new_id}'::uuid").to_i).to eq(1)
       expect(conn.select_value("SELECT COUNT(*) FROM taxon_concepts WHERE id = '#{old_id}'::uuid").to_i).to eq(0)
     end
+
+    context "when new_uuid already exists (merge, e.g. powo_adoption)" do
+      before do
+        # The redirect target is an accepted concept already in the table, so the
+        # old row cannot simply be renamed onto it without a primary-key collision.
+        conn.execute(<<~SQL)
+          INSERT INTO taxon_concepts (id, rank, source, status, scientific_name, authorship, hortidex_version)
+          VALUES ('#{new_id}'::uuid, 'genus', 'powo', 'accepted', 'Argyranthemum', 'Webb ex Sch.Bip.', '#{Hortidex::VERSION}')
+        SQL
+      end
+
+      it "drops the redundant old row instead of colliding on the primary key" do
+        expect { task.run }.not_to raise_error
+        expect(conn.select_value("SELECT COUNT(*) FROM taxon_concepts WHERE id = '#{old_id}'::uuid").to_i).to eq(0)
+        expect(conn.select_value("SELECT COUNT(*) FROM taxon_concepts WHERE id = '#{new_id}'::uuid").to_i).to eq(1)
+      end
+
+      it "repoints references off the merged-away row onto the surviving target" do
+        child = SecureRandom.uuid
+        cn = SecureRandom.uuid
+        conn.execute(<<~SQL)
+          INSERT INTO taxon_concepts (id, rank, source, status, scientific_name, authorship, parent_id, hortidex_version)
+          VALUES ('#{child}'::uuid, 'species', 'powo', 'accepted', 'Argyranthemum frutescens', 'L.', '#{old_id}'::uuid, '#{Hortidex::VERSION}')
+        SQL
+        conn.execute(<<~SQL)
+          INSERT INTO common_names (id, taxon_concept_id, locale, name, source, preferred)
+          VALUES ('#{cn}'::uuid, '#{old_id}'::uuid, 'en', 'Marguerite', 'powo', true)
+        SQL
+        task.run
+        expect(conn.select_value("SELECT parent_id FROM taxon_concepts WHERE id = '#{child}'::uuid")).to eq(new_id)
+        expect(conn.select_value("SELECT taxon_concept_id FROM common_names WHERE id = '#{cn}'::uuid")).to eq(new_id)
+      end
+    end
   end
 
   describe "version check" do

@@ -88,10 +88,22 @@ module Hortidex
         SQL
       end
 
-      # Remap the primary key itself last.
+      # Remap the primary key last. Two cases:
+      #   * rename — the new id doesn't exist yet → move the row's id over.
+      #   * merge  — the new id already exists (e.g. powo_adoption); the FK
+      #     columns above already point at it, so drop the redundant old row.
       conn.execute(<<~SQL)
-        UPDATE taxon_concepts SET id = c.new_uuid::uuid
-        FROM temp_concordance c WHERE taxon_concepts.id = c.old_uuid::uuid
+        UPDATE taxon_concepts t SET id = c.new_uuid::uuid
+        FROM temp_concordance c
+        WHERE t.id = c.old_uuid::uuid
+          AND NOT EXISTS (SELECT 1 FROM taxon_concepts e WHERE e.id = c.new_uuid::uuid)
+      SQL
+
+      conn.execute(<<~SQL)
+        DELETE FROM taxon_concepts t
+        USING temp_concordance c
+        WHERE t.id = c.old_uuid::uuid
+          AND EXISTS (SELECT 1 FROM taxon_concepts e WHERE e.id = c.new_uuid::uuid)
       SQL
 
       conn.execute("DROP TABLE temp_concordance")

@@ -60,15 +60,13 @@
   url: "https://ec.europa.eu/food/plant-variety-portal/"
   license:
     name: "CC BY 4.0"
-    url: "https://commission.europa.eu/legal-notice_en"
+    url: "http://creativecommons.org/licenses/by/4.0/"
   description: >-
     Registered plant variety denominations are sourced from the EU Plant
     Variety Portal, reused under the European Commission's reuse framework.
   modifications: >-
-    Only UPOV codes and variety denomination names are used, taken verbatim;
-    cultivar registration details (which may carry stricter terms) are not
-    included. A few rows with malformed UPOV codes were corrected manually to
-    align with the other datasets.
+    Variety denomination names are used verbatim, mapped through UPOV codes from
+    the GENIE dataset. A few rows with malformed UPOV codes were corrected manually.
   citation:
     author: "European Commission"
     title: "EU Plant Variety Portal"

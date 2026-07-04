@@ -179,7 +179,7 @@ safe_join(taxon_concept.name_parts.map { |text, italic|
 
 ## Known gaps
 
-`import_issues.csv` is shipped with each gem version and lists taxa that could not be resolved during the import — unmatched UPOV entries, unresolvable parents, retired POWO IDs with no replacement found. These are known gaps, not failures. Inspect this file if a taxon you expect is absent from the dataset.
+`import_issues.csv.gz` is shipped with each gem version and lists taxa that could not be resolved during the import — unmatched UPOV entries, unresolvable parents, retired POWO IDs with no replacement found. These are known gaps, not failures. Inspect this file if a taxon you expect is absent from the dataset.
 
 ## Attribution
 

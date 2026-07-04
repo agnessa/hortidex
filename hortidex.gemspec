@@ -7,6 +7,7 @@ Gem::Specification.new do |spec|
   spec.version = Hortidex::VERSION
   spec.authors = ["Agnieszka Figiel"]
   spec.license = "MIT"
+  spec.homepage = "https://github.com/agnessa/hortidex"
 
   spec.summary = "Curated plant taxonomy dataset — POWO, UPOV, and EU PVP variety data"
   spec.description = <<~DESC
@@ -17,9 +18,9 @@ Gem::Specification.new do |spec|
   DESC
 
   git_tracked = Dir.chdir(__dir__) { `git ls-files -z 2>/dev/null`.split("\x0") }
-  source_files = git_tracked.reject { |f| f.start_with?("spec/") || %w[Gemfile Gemfile.lock].include?(f) }
-  data_files = Dir[File.join(__dir__, "data/*.{csv.gz,yml}")].map { |f| f.delete_prefix("#{__dir__}/") }
-  spec.files = source_files + data_files
+  spec.files = git_tracked.select do |f|
+    f.start_with?("lib/", "data/", "tasks/") || %w[README.md CHANGELOG.md LICENSE].include?(f)
+  end
   spec.require_paths = ["lib"]
 
   spec.metadata = {

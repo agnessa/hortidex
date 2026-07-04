@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] — 2026-07-04
+
+Maintenance release: packaging cleanup, an attribution correction, and a data
+regeneration from the same upstream snapshot as 2.0.0. Taxonomy counts and ids are
+unchanged, so this applies as a straight upsert with no concordance step.
+
+- Slim the published gem to its runtime payload — library code, the bundled data
+  files, the rake task, and the root docs. Dev-only files (`.github/`, `.gitignore`,
+  `.standard.yml`) are no longer shipped, and `homepage` metadata is now set.
+- Correct the EU Plant Variety Portal licence URL in `attribution.yml` to point to
+  the CC BY 4.0 deed (it previously linked the European Commission legal-notice
+  page), and tighten the EU PVP modifications wording.
+- Normalise casing in `import_issues.csv.gz`: the `source` column is now lowercase
+  (`powo`/`upov`/`eupvp`) to match `taxon_concepts.source`, and `source_status` now
+  consistently carries the verbatim upstream Title Case.
+
 ## [2.0.0] — 2026-06-22
 
 Refreshed dataset from new upstream snapshots (WCVP 2026-06-04, UPOV GENIE 2026-06-12,

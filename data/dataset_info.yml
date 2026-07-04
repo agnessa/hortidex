@@ -42,8 +42,8 @@
 #                             was merged) -> redirect to the surviving taxon
 #   upov_remap                a UPOV code moved to a different taxon between releases
 ---
-version: 2.0.0
-generated_at: '2026-06-23'
+version: 2.0.1
+generated_at: '2026-07-04'
 source:
   powo:
     total: 1448984

@@ -12,8 +12,11 @@ Source, licence, and citation for each bundled dataset live in [`data/attributio
 
 ## Installation
 
+Hortidex is distributed through GitHub, not RubyGems. Add it to your `Gemfile`
+pinned to a release tag:
+
 ```ruby
-gem 'hortidex', '~> 2.0'
+gem "hortidex", github: "agnessa/hortidex", tag: "v2.0.1"
 ```
 
 ## Database setup
@@ -58,12 +61,12 @@ This creates three tables.
 
 **`taxonomy_apply_runs`** — internal bookkeeping for each `taxonomy:apply` run; no application code needs to read it directly.
 
-| Column             | Type      | Notes                                                                 |
-|--------------------|-----------|----------------------------------------------------------------------|
-| `hortidex_version` | string    | Gem version the run applied                                           |
-| `status`           | smallint  | `0` running, `1` succeeded, `2` failed                                |
-| `started_at`       | timestamp | Stamped when the run begins (NOT NULL)                                |
-| `completed_at`     | timestamp | Stamped only on success; NULL while running or after a failure        |
+| Column             | Type      | Notes                                                          |
+|--------------------|-----------|----------------------------------------------------------------|
+| `hortidex_version` | string    | Gem version the run applied                                    |
+| `status`           | smallint  | `0` running, `1` succeeded, `2` failed                         |
+| `started_at`       | timestamp | Stamped when the run begins (NOT NULL)                         |
+| `completed_at`     | timestamp | Stamped only on success; NULL while running or after a failure |
 
 A run is inserted as `running` with `started_at` *before* the apply transaction — so a crash still leaves a trace — then settled to `succeeded` (stamping `completed_at`) or `failed`. The downgrade guard reads the latest **succeeded** row and raises if the current gem is older than the last version successfully applied.
 

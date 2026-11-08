@@ -31,7 +31,7 @@ RSpec.describe Hortidex::ApplyTask do
         parent_id uuid, accepted_name_id uuid,
         ancestor_path ltree,
         powo_id text, upov_code text, gbif_id text,
-        hortidex_version text
+        hortidex_version text, life_form text
       )
     SQL
     conn.execute(<<~SQL)
@@ -117,6 +117,34 @@ RSpec.describe Hortidex::ApplyTask do
       ])
       expect { task.run }.not_to raise_error
       expect(conn.select_value("SELECT COUNT(*) FROM taxon_concepts").to_i).to eq(2)
+    end
+  end
+
+  describe "life_form" do
+    let(:id) { SecureRandom.uuid }
+
+    before do
+      empty_concordance
+      gz_csv(File.join(data_dir, "taxon_concepts.csv.gz"), TC_HEADERS + ["life_form"],
+        [[id, "species", "powo", "accepted", "Rosa canina", "L.",
+          nil, nil, nil, nil, nil, nil, "2.1.0", "shrub"]])
+    end
+
+    it "applies life_form, including over an existing row" do
+      task.run
+      conn.execute("UPDATE taxon_concepts SET life_form = 'stale'")
+      task.run
+      expect(conn.select_value("SELECT life_form FROM taxon_concepts")).to eq("shrub")
+    end
+
+    context "when the install has no life_form column" do
+      before { conn.execute("ALTER TABLE taxon_concepts DROP COLUMN life_form") }
+      after { conn.execute("ALTER TABLE taxon_concepts ADD COLUMN life_form text") }
+
+      it "applies the rest of the row and warns" do
+        expect { task.run }.to output(/no life_form column/).to_stderr
+        expect(conn.select_value("SELECT scientific_name FROM taxon_concepts")).to eq("Rosa canina")
+      end
     end
   end
 

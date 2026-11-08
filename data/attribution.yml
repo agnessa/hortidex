@@ -52,7 +52,7 @@
       List of UPOV Codes with Botanical and Common Names, Technical Working
       Party(s) (TWPs) and Crop Type(s)
     url: "https://www.upov.int/genie/reports/twp.xhtml"
-    accessed_on: "2026-06-12"
+    accessed_on: "2026-11-08"
 
 - id: eupvp
   name: "EU Plant Variety Portal"
@@ -71,4 +71,4 @@
     author: "European Commission"
     title: "EU Plant Variety Portal"
     url: "https://ec.europa.eu/food/plant-variety-portal/"
-    accessed_on: "2026-06-12"
+    accessed_on: "2026-11-08"

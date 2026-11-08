@@ -118,16 +118,20 @@ module Hortidex
           scientific_name TEXT, authorship TEXT,
           parent_id TEXT, accepted_name_id TEXT,
           ancestor_path TEXT, powo_id TEXT, upov_code TEXT, gbif_id TEXT,
-          hortidex_version TEXT
+          hortidex_version TEXT, life_form TEXT
         )
       SQL
 
       Zlib::GzipReader.open(path) do |gz|
         CSV.new(gz, headers: true).each_slice(BATCH_SIZE) do |slice|
-          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id hortidex_version]) }.join(", ")
+          values = slice.map { |r| row_values(conn, r, %w[id rank source status scientific_name authorship parent_id accepted_name_id ancestor_path powo_id upov_code gbif_id hortidex_version life_form]) }.join(", ")
           conn.execute("INSERT INTO temp_taxon_concepts VALUES #{values}")
         end
       end
+
+      # life_form is optional: installs that predate it keep working without a migration.
+      life_form = conn.column_exists?(:taxon_concepts, :life_form)
+      warn "[hortidex] taxon_concepts has no life_form column — life_form data was not applied" unless life_form
 
       # hortidex_version is per-row provenance shipped in the data file (the release
       # each row was last backed by an upstream source), not the running gem version.
@@ -135,10 +139,10 @@ module Hortidex
         INSERT INTO taxon_concepts
           (id, rank, source, status, scientific_name, authorship,
            parent_id, accepted_name_id, ancestor_path, powo_id, upov_code, gbif_id,
-           hortidex_version)
+           hortidex_version#{", life_form" if life_form})
         SELECT id::uuid, rank, source, status, scientific_name, authorship,
                parent_id::uuid, accepted_name_id::uuid, ancestor_path::ltree, powo_id, upov_code, gbif_id,
-               hortidex_version
+               hortidex_version#{", life_form" if life_form}
         FROM temp_taxon_concepts
         WHERE %{filter}
         ORDER BY COALESCE(LENGTH(ancestor_path) - LENGTH(REPLACE(ancestor_path, '.', '')), 0) ASC
@@ -153,6 +157,7 @@ module Hortidex
           ancestor_path    = excluded.ancestor_path,
           upov_code        = excluded.upov_code,
           hortidex_version = excluded.hortidex_version
+          #{", life_form = excluded.life_form" if life_form}
       SQL
       # Accepted taxa first (no accepted_name_id self-reference to satisfy), ordered
       # shallowest-first so parent rows exist before their children.

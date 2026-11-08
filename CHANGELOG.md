@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] — 2026-11-08
+
+Refreshed UPOV GENIE and EU Plant Variety Portal data (both 2026-11-08) on the same
+WCVP snapshot as 2.0.0, plus POWO life form. No ids changed and no concordance
+entries were added, so this applies as a straight upsert.
+
+- Add an optional `taxon_concepts.life_form` column: POWO's life form description,
+  verbatim (e.g. `shrub or tree`). New installs get it from the install migration.
+  Existing installs keep working without it, and `taxonomy:apply` warns that the data
+  was skipped; to receive it, run `add_column :taxon_concepts, :life_form, :string`
+  and re-apply.
+- 9,722 new published taxa, including 9,695 new EU PVP cultivars and 64 new UPOV codes.
+- Correct 31 UPOV names, mostly "Hybrids between …" entries whose genera had been
+  dropped by name parsing (e.g. `Hybrids between reticulata sinensis`).
+- Refresh 4,994 cultivar names to match their parent taxon's current name. Most are
+  beets, e.g. `Beta vulgaris Sugar Beet Group 'X'` is now
+  `Beta vulgaris var. altissima 'X'`. Their ids are unchanged.
+
 ## [2.0.1] — 2026-07-04
 
 Maintenance release: packaging cleanup, an attribution correction, and a data

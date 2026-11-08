@@ -16,7 +16,7 @@ Hortidex is distributed through GitHub, not RubyGems. Add it to your `Gemfile`
 pinned to a release tag:
 
 ```ruby
-gem "hortidex", github: "agnessa/hortidex", tag: "v2.0.1"
+gem "hortidex", github: "agnessa/hortidex", tag: "v2.1.0"
 ```
 
 ## Database setup
@@ -45,6 +45,7 @@ This creates three tables.
 | `powo_id`          | string   | POWO plant identifier; unique where present                                                                                                                      |
 | `upov_code`        | string   | UPOV code; present for taxa sourced from GENIE                                                                                                                   |
 | `gbif_id`          | string   | GBIF taxon key; unique where present                                                                                                                             |
+| `life_form`        | string   | Optional. POWO life form description, verbatim (e.g. `shrub or tree`); nil when POWO has none                                                                    |
 | `ancestor_path`    | ltree    | Materialised path of `id` segments for ancestor/descendant queries                                                                                               |
 | `search_vector`    | tsvector | Full-text index over `scientific_name`                                                                                                                           |
 | `hortidex_version` | string   | Dataset release this row was last backed by an upstream source; carry-over rows keep an older value                                                              |
@@ -98,6 +99,12 @@ Apply the current gem version to the database:
 
 ```
 bin/rails taxonomy:apply
+```
+
+`life_form` is optional. Installs created before 2.1.0 keep working without it, and `taxonomy:apply` prints a warning that the data was skipped. To receive it, add the column and re-apply:
+
+```ruby
+add_column :taxon_concepts, :life_form, :string
 ```
 
 ## Versioning

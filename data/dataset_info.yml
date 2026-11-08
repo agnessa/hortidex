@@ -42,8 +42,8 @@
 #                             was merged) -> redirect to the surviving taxon
 #   upov_remap                a UPOV code moved to a different taxon between releases
 ---
-version: 2.0.1
-generated_at: '2026-07-04'
+version: 2.1.0
+generated_at: '2026-11-08'
 source:
   powo:
     total: 1448984
@@ -58,11 +58,11 @@ source:
       Synonym: 880359
       Unplaced: 38571
   upov:
-    total: 10119
+    total: 10181
   eupvp:
-    total: 152864
+    total: 163991
 database:
-  total: 1562314
+  total: 1572029
   powo:
     total: 1446141
     by_status:
@@ -76,19 +76,19 @@ database:
       synonym: 877815
       unplaced: 38531
   upov:
-    total: 10112
+    total: 10176
     by_status:
-      accepted: 7573
-      artificial_hybrid: 200
+      accepted: 7610
+      artificial_hybrid: 201
       illegitimate: 37
       invalid: 28
       misapplied: 1
-      no_powo_id: 1222
+      no_powo_id: 1242
       orthographic: 7
-      synonym: 997
-      unplaced: 47
+      synonym: 1001
+      unplaced: 49
   eupvp:
-    total: 114492
+    total: 124187
   concordance:
     total: 166
     by_reason:
@@ -101,31 +101,31 @@ database:
       powo_typo_fix: 1
       upov_remap: 12
 published:
-  total: 554402
-  exists_in_db: 554402
+  total: 564124
+  exists_in_db: 564124
   accepted:
-    total: 550861
+    total: 560576
     powo: 434690
-    non_powo: 116171
+    non_powo: 125886
   non_accepted:
-    total: 3541
+    total: 3548
     by_status:
-      artificial_hybrid: 227
+      artificial_hybrid: 228
       illegitimate: 66
       invalid: 36
       misapplied: 1
       orthographic: 7
-      synonym: 3107
-      unplaced: 97
+      synonym: 3111
+      unplaced: 99
     by_rationale:
-      upov_coded: 1317
+      upov_coded: 1324
       structural: 2224
   by_rank:
-    species: 369531
-    cultivar: 114492
-    subspecies: 28283
-    variety: 26043
-    genus: 14497
+    species: 369553
+    cultivar: 124187
+    subspecies: 28284
+    variety: 26045
+    genus: 14499
     form: 650
     family: 457
     nothosubspecies: 383
@@ -133,7 +133,7 @@ published:
     subvariety: 8
     nothoform: 4
     convariety: 4
-  upov_codes: 10112
+  upov_codes: 10176
 reconciliation:
   powo:
     source_total: 1448984
@@ -150,26 +150,26 @@ reconciliation:
     other_issues:
       retired_taxon: 359
   upov:
-    source_total: 10119
+    source_total: 10181
     dropped_with_issue:
       unresolvable_parent: 5
-    imported_from_source: 10112
+    imported_from_source: 10174
     residual: 2
-    retained_from_previous_versions: 0
-    database_total: 10112
+    retained_from_previous_versions: 2
+    database_total: 10176
     other_issues:
-      unmatched_taxon: 159
+      unmatched_taxon: 60
   eupvp:
-    source_total: 152864
+    source_total: 163991
     dropped_with_issue:
       unmatched_taxon: 4
     skipped_not_importable:
-      blank_denomination: 571
-      duplicate_denomination: 37966
-    imported_from_source: 114323
-    residual: 0
-    retained_from_previous_versions: 169
-    database_total: 114492
+      blank_denomination: 624
+      duplicate_denomination: 39445
+    imported_from_source: 123922
+    residual: -4
+    retained_from_previous_versions: 265
+    database_total: 124187
     other_issues: {}
 comparison:
   powo:
@@ -177,12 +177,12 @@ comparison:
     accepted_published: 434690
     accepted_delta: -1
   upov:
-    source: 10119
-    database: 10112
-    published: 10112
-    delta: -7
+    source: 10181
+    database: 10176
+    published: 10176
+    delta: -5
   eupvp:
-    source: 152864
-    database: 114492
-    published: 114492
-    delta: -38372
+    source: 163991
+    database: 124187
+    published: 124187
+    delta: -39804

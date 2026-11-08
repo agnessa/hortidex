@@ -15,6 +15,7 @@ class HortidexInstall < ActiveRecord::Migration[<%= ActiveRecord::Migration.curr
       t.string :powo_id
       t.string :upov_code
       t.string :gbif_id
+      t.string :life_form
       t.string :hortidex_version
       t.column :ancestor_path,    :ltree
       t.column :search_vector,    :tsvector

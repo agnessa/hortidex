@@ -106,6 +106,12 @@ module Hortidex
       self.class.reindex_ancestor_path(id)
     end
 
+    # @return [Array<String>] the ids in ancestor_path, root first and ending with this taxon's own id
+    # Reverses the '-' → '_' swap made by reindex_ancestor_path to fit ltree's label rules.
+    def ancestor_path_ids
+      ancestor_path.to_s.split(".").map { |a| a.tr("_", "-") }
+    end
+
     private
 
     def parent_rank_must_be_higher_than_self

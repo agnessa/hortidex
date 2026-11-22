@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- Add `TaxonConcept#ancestor_path_ids`: the ids in `ancestor_path`, root first and
+  ending with the taxon's own id, with the hyphens that `reindex_ancestor_path`
+  swaps to underscores for ltree restored. Saves consumers from decoding the path
+  themselves.
+
 ## [2.1.0] — 2026-11-08
 
 Refreshed UPOV GENIE and EU Plant Variety Portal data (both 2026-11-08) on the same

@@ -181,4 +181,21 @@ RSpec.describe Hortidex::TaxonConcept do
       expect { TaxonConcept.reindex_ancestor_path(family.id) }.not_to raise_error
     end
   end
+
+  describe "#ancestor_path_ids" do
+    it "lists the path's ids root first, ending with the taxon itself" do
+      genus.reload
+      expect(genus.ancestor_path_ids).to eq([family.id.to_s, genus.id.to_s])
+    end
+
+    it "restores the hyphens swapped out of UUIDs for ltree" do
+      root, leaf = "3f2a1b4c-0d5e-4f60-8a7b-9c0d1e2f3a4b", "7d1c2b3a-4e5f-4061-9283-a4b5c6d7e8f9"
+      taxon = TaxonConcept.new(ancestor_path: [root, leaf].map { |a| a.tr("-", "_") }.join("."))
+      expect(taxon.ancestor_path_ids).to eq([root, leaf])
+    end
+
+    it "is empty before the path is built" do
+      expect(TaxonConcept.new.ancestor_path_ids).to eq([])
+    end
+  end
 end

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-11-22
+
+Code-only release: the bundled data is the same snapshot as 2.1.0.
+
 - Add `TaxonConcept#ancestor_path_ids`: the ids in `ancestor_path`, root first and
   ending with the taxon's own id, with the hyphens that `reindex_ancestor_path`
   swaps to underscores for ltree restored. Saves consumers from decoding the path

@@ -16,7 +16,7 @@ Hortidex is distributed through GitHub, not RubyGems. Add it to your `Gemfile`
 pinned to a release tag:
 
 ```ruby
-gem "hortidex", github: "agnessa/hortidex", tag: "v2.1.0"
+gem "hortidex", github: "agnessa/hortidex", tag: "v2.2.0"
 ```
 
 ## Database setup
